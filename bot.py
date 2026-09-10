@@ -2,8 +2,8 @@ import requests
 import json
 import os
 
-TELEGRAM_TOKEN = os.environ["8509941792:AAE5Q-DnjbFTASQ3ZdH6eWFKi0twV2CCSI8"]
-CHANNEL_ID = os.environ["-1004338659412"]
+TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
+CHANNEL_ID = os.environ["CHANNEL_ID"]
 
 ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
 STATE_FILE = "state.json"
