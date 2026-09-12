@@ -27,12 +27,12 @@ def get_standings():
 
 def format_conference(entries, conf_name):
     lines = [conf_name]
-    sorted_entries = sorted(entries, key=lambda e: next((s["value"] for s in e["stats"] if s["name"] == "playoffSeed"), 99))
+    sorted_entries = sorted(entries, key=lambda e: next((s["value"] for s in e["stats"] if s["name"] == "playoffseed"), 99))
     for entry in sorted_entries:
         team = entry["team"]["displayName"]
         wins = next((s["value"] for s in entry["stats"] if s["name"] == "wins"), 0)
         losses = next((s["value"] for s in entry["stats"] if s["name"] == "losses"), 0)
-        seed = next((s["value"] for s in entry["stats"] if s["name"] == "playoffSeed"), 0)
+        seed = next((s["value"] for s in entry["stats"] if s["name"] == "playoffseed"), 0)
         lines.append(str(int(seed)) + ". " + team + " (" + str(int(wins)) + "-" + str(int(losses)) + ")")
     return "\n".join(lines)
 
@@ -42,7 +42,7 @@ def check_playoff_status(entries, playoff_state):
         team_name = entry["team"]["displayName"]
         note_obj = entry.get("note")
         note = note_obj.get("description", "") if note_obj else ""
-        seed = next((s["value"] for s in entry["stats"] if s["name"] == "playoffSeed"), None)
+        seed = next((s["value"] for s in entry["stats"] if s["name"] == "playoffseed"), None)
         wins = next((s["value"] for s in entry["stats"] if s["name"] == "wins"), 0)
         losses = next((s["value"] for s in entry["stats"] if s["name"] == "losses"), 0)
         games_played = wins + losses
