@@ -1,29 +1,33 @@
 name: Weekly Standings
+
 on:
-  schedule:
-    - cron: '0 8 * * 1'
-    - cron: '0 17 * * 1'
-  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * 1'
+    - cron: '0 17 * * 1'
+  workflow_dispatch:
+
 jobs:
-  run:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install requests
-      - env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-        run: |
-          HOUR=$(date -u +%H)
-          if [ "$HOUR" = "08" ]; then python standings.py eastern; else python standings.py western; fi
-      - run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          git add playoff_state.json
-          git commit -m "Update playoff state" || echo "No changes"
-          git push
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Send standings
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+        run: |
+          HOUR=$(date -u +%H)
+          if [ "$HOUR" = "08" ]; then python standings.py eastern; else python standings.py western; fi
+      - name: Commit playoff state
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add playoff_state.json
+          git commit -m "Update playoff state" || echo "No changes"
+          git push
