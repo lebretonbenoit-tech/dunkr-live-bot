@@ -8,8 +8,8 @@ STANDINGS_URL = "https://site.api.espn.com/apis/v2/sports/basketball/nba/standin
 PLAYOFF_STATE_FILE = "playoff_state.json"
 
 def send_message(text):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    requests.post(url, data={"chat_id": CHANNEL_ID, "text": text})
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    requests.post(url, data={"chat_id": CHANNEL_ID, "text": text})
 
 def load_playoff_state():
     if os.path.exists(PLAYOFF_STATE_FILE):
