@@ -43,12 +43,18 @@ def check_playoff_status(entries, playoff_state):
         note_obj = entry.get("note")
         note = note_obj.get("description", "") if note_obj else ""
         seed = next((s["value"] for s in entry["stats"] if s["name"] == "playoffSeed"), None)
+        wins = next((s["value"] for s in entry["stats"] if s["name"] == "wins"), 0)
+        losses = next((s["value"] for s in entry["stats"] if s["name"] == "losses"), 0)
+        games_played = wins + losses
+
+        if games_played < 40:
+            continue
 
         prev = playoff_state.get(team_id, {})
 
         clinched = "clinch" in note.lower()
         eliminated = "eliminat" in note.lower()
-        top6 = seed is not None and seed <= 6
+        top6 = games_played >= 55 and seed is not None and seed <= 6
 
         if clinched and not prev.get("clinched"):
             send_message("CLINCHED PLAYOFFS - " + team_name + " have officially secured a playoff spot!")
