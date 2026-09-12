@@ -57,11 +57,11 @@ def check_playoff_status(entries, playoff_state):
         top6 = games_played >= 55 and seed is not None and seed <= 6
 
         if clinched and not prev.get("clinched"):
-            send_message("CLINCHED PLAYOFFS - " + team_name + " have officially secured a playoff spot!")
+            send_message("🎟️ CLINCHED PLAYOFFS\n" + team_name + " have officially secured a playoff spot!")
         if eliminated and not prev.get("eliminated"):
-            send_message("ELIMINATED - " + team_name + " have been mathematically eliminated from playoff contention.")
+            send_message("❌ ELIMINATED\n" + team_name + " have been mathematically eliminated from playoff contention.")
         if top6 and not prev.get("top6"):
-            send_message("LOCKED IN TOP 6 - " + team_name + " have secured a top-6 seed.")
+            send_message("🔓 LOCKED IN TOP 6\n" + team_name + " have secured a top-6 seed.")
 
         playoff_state[team_id] = {"clinched": clinched, "eliminated": eliminated, "top6": top6}
 
@@ -78,7 +78,7 @@ def main(conference):
         playoff_state = check_playoff_status(entries, playoff_state)
 
         if conference.lower() in conf_name.lower():
-            message = format_conference(entries, conf_name.upper() + " STANDINGS")
+            message = format_conference(entries, "📊 " + conf_name.upper() + " STANDINGS")
             send_message(message)
 
     save_playoff_state(playoff_state)
