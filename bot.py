@@ -28,14 +28,37 @@ def get_games():
     response = requests.get(ESPN_URL)
     return response.json().get("events", [])
 
+def check_streaks(state, team_name, team_id, won):
+    streaks = state.setdefault("streaks", {})
+    team_streak = streaks.get(team_id, {"count": 0, "type": None})
+
+    streak_type = "W" if won else "L"
+
+    if team_streak["type"] == streak_type:
+        team_streak["count"] += 1
+    else:
+        if team_streak["count"] > 5:
+            old_type = "win" if team_streak["type"] == "W" else "losing"
+            send_message(f"⛔ STREAK SNAPPED\n{team_name}'s {team_streak['count']}-game {old_type} streak comes to an end.")
+        team_streak = {"count": 1, "type": streak_type}
+
+    streaks[team_id] = team_streak
+
+    if team_streak["count"] >= 5:
+        if streak_type == "W":
+            send_message(f"📈 WIN STREAK\n{team_name} have won {team_streak['count']} straight games!")
+        else:
+            send_message(f"📉 LOSING STREAK\n{team_name} have lost {team_streak['count']} straight games.")
+
 def process_games():
     state = load_state()
     games = get_games()
 
     for game in games:
         game_id = game["id"]
+        season_type = game.get("season", {}).get("type") # 1 = preseason, 2 = regular season, 3 = playoffs
         competition = game["competitions"][0]
-        status = competition["status"]["type"]["name"] # e.g. STATUS_FINAL, STATUS_IN_PROGRESS
+        status = competition["status"]["type"]["name"]
         period = competition["status"]["period"]
 
         teams = competition["competitors"]
@@ -72,11 +95,17 @@ def process_games():
             if diff >= 25:
                 send_message(f"💥 BLOWOUT\n{away_name} {away_score} - {home_score} {home_name}")
 
+            # Streak tracking (regular season only)
+            if season_type == 2:
+                home_won = home_score > away_score
+                check_streaks(state, home_name, home["team"]["id"], home_won)
+                check_streaks(state, away_name, away["team"]["id"], not home_won)
+
             # Player stats leaders (points, rebounds, assists, triple-double)
             leaders = competition.get("leaders", [])
             player_stats = {}
             for leader_cat in leaders:
-                cat_name = leader_cat["name"] # pointsLeader, reboundsLeader, assistsLeader
+                cat_name = leader_cat["name"]
                 for leader in leader_cat.get("leaders", []):
                     athlete = leader["athlete"]["displayName"]
                     value = int(leader["value"])
@@ -87,17 +116,14 @@ def process_games():
                 reb = stats.get("reboundsLeader", 0)
                 ast = stats.get("assistsLeader", 0)
 
-                # Point threshold alert
                 reached = [t for t in POINT_THRESHOLDS if pts >= t]
                 if reached:
                     highest = max(reached)
                     send_message(f"🔥 {highest}+ PTS\n{athlete}: {pts} PTS")
 
-                # Triple-double
                 if pts >= 10 and reb >= 10 and ast >= 10:
                     send_message(f"💫 TRIPLE-DOUBLE\n{athlete}: {pts} PTS, {reb} REB, {ast} AST")
 
-        # Save updated state
         state[game_id] = {"status": status, "period": period}
 
     save_state(state)
