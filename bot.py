@@ -56,7 +56,7 @@ def process_games():
 
     for game in games:
         game_id = game["id"]
-        season_type = game.get("season", {}).get("type") # 1 = preseason, 2 = regular season, 3 = playoffs
+        season_type = game.get("season", {}).get("type")  # 1 = preseason, 2 = regular season, 3 = playoffs
         competition = game["competitions"][0]
         status = competition["status"]["type"]["name"]
         period = competition["status"]["period"]
@@ -72,19 +72,6 @@ def process_games():
 
         prev = state.get(game_id, {})
         prev_status = prev.get("status")
-        prev_period = prev.get("period")
-
-        # --- End of period detection ---
-        if status == "STATUS_IN_PROGRESS" and period != prev_period:
-            if period == 2:
-                send_message(f"🏀 END OF Q1\n{away_name} {away_score} - {home_score} {home_name}")
-            elif period == 3:
-                send_message(f"🏀 HALFTIME\n{away_name} {away_score} - {home_score} {home_name}")
-            elif period == 4:
-                send_message(f"🏀 END OF Q3\n{away_name} {away_score} - {home_score} {home_name}")
-            elif period > 4:
-                ot_number = period - 4
-                send_message(f"🏀 END OF OT{ot_number}\n{away_name} {away_score} - {home_score} {home_name}")
 
         # --- Final detection ---
         if status == "STATUS_FINAL" and prev_status != "STATUS_FINAL":
